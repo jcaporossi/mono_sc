@@ -7,20 +7,20 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 
 import "./MonopolyBoard.sol";
 
+struct Build {
+	// version number
+	uint16 edition;
+	// id of the cell of Monopoly board
+	uint8 land;
+	// build type: e.g. 0 -> house, 1 -> hotel, 2 -> hotel
+	uint8 buildType;
+}
+
 contract MonopolyBuild is ERC1155Supply, AccessControl {
 	bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 	bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
 	MonopolyBoard private immutable board;
-
-	struct Build {
-		// version number
-		uint16 edition;
-		// id of the cell of Monopoly board
-		uint8 land;
-		// build type: e.g. 0 -> house, 1 -> hotel, 2 -> hotel
-		uint8 buildType;
-	}
 
 	modifier isValidBuild(
 		uint16 edition,
@@ -56,20 +56,10 @@ contract MonopolyBuild is ERC1155Supply, AccessControl {
 		_mint(_to, id_, _supply, "");
 	}
 
-	function get(uint256 _id)
-		public
-		view
-		returns (
-			uint16 edition_,
-			uint8 land_,
-			uint8 buildType_
-		)
-	{
+	function get(uint256 _id) public view returns (Build memory b_) {
 		require(exists(_id), "This build does not exist");
 
-		Build storage build = builds[_id];
-
-		return (build.edition, build.land, build.buildType);
+		b_ = builds[_id];
 	}
 
 	function burn(

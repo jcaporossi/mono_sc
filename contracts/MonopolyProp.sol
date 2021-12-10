@@ -7,22 +7,22 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
 import "./MonopolyBoard.sol";
 
+struct Prop {
+	// edition number
+	uint16 edition;
+	// id of the cell of Monopoly board
+	uint8 land;
+	// rarity level (as a power of 10, i.e rarity = 1 means 10^1 = 10 versions)
+	uint8 rarity;
+	// serial number
+	uint32 serial;
+}
+
 contract MonopolyProp is ERC721Enumerable, AccessControl {
 	bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 	bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
 	MonopolyBoard private immutable board;
-
-	struct Prop {
-		// edition number
-		uint16 edition;
-		// id of the cell of Monopoly board
-		uint8 land;
-		// rarity level (as a power of 10, i.e rarity = 1 means 10^1 = 10 versions)
-		uint8 rarity;
-		// serial number
-		uint32 serial;
-	}
 
 	modifier isValidProp(
 		uint16 edition,
