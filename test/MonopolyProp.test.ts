@@ -101,7 +101,7 @@ describe("MonopolyProp contract", function () {
     
   });
 
-  it("should fail to mint two PROPs for the same cell_id with rarity_lvl = 0", async function () {
+  it("should fail to mint two PROPs for the same land with rarity_lvl = 0", async function () {
     
     let minter_prop = await prop.connect(minter);
 

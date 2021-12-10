@@ -24,15 +24,16 @@ contract MonopolyProp is ERC721Enumerable, AccessControl {
 
 	MonopolyBoard private immutable board;
 
-	modifier isValidProp(
+	function isValidProp(
 		uint16 edition,
 		uint8 land,
 		uint8 rarity
-	) {
-		require(edition <= board.getMaxEdition(), "non valid edition number");
-		require(land <= board.getNbLands(edition), "land idx out of range");
-		require(rarity <= board.getRarityLevel(edition), "rarity lvl out of range");
-		_;
+	) public view returns (bool) {
+		return
+			(edition <= board.getMaxEdition()) &&
+			(land <= board.getNbLands(edition)) &&
+			(board.isBuildingLand(edition, land)) &&
+			(rarity <= board.getRarityLevel(edition));
 	}
 
 	mapping(uint256 => Prop) private props;
@@ -73,8 +74,8 @@ contract MonopolyProp is ERC721Enumerable, AccessControl {
 		uint16 _edition,
 		uint8 _land,
 		uint8 _rarity
-	) external onlyRole(MINTER_ROLE) isValidProp(_edition, _land, _rarity) returns (uint256 id_) {
-		require(board.isBuildingLand(_edition, _land), "property cannot be minted for this land");
+	) external onlyRole(MINTER_ROLE) returns (uint256 id_) {
+		require(isValidProp(_edition, _land, _rarity), "PROP cannot be minted");
 		id_ = generateID(_edition, _land, _rarity);
 
 		_safeMint(_to, id_);
@@ -98,7 +99,8 @@ contract MonopolyProp is ERC721Enumerable, AccessControl {
 		uint16 _edition,
 		uint8 _land,
 		uint8 _rarity
-	) public view isValidProp(_edition, _land, _rarity) returns (uint32 amount_) {
+	) public view returns (uint32 amount_) {
+		require(isValidProp(_edition, _land, _rarity), "PROP does not exist");
 		return numOfProps[_edition][_land][_rarity];
 	}
 

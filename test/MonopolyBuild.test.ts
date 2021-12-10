@@ -27,7 +27,7 @@ describe("MonopolyBuild contract", function () {
     await board.deployed();
 
     const buildFactory = await ethers.getContractFactory("MonopolyBuild");
-    build = await buildFactory.deploy("https://token-cdn/", board.address);
+    build = await buildFactory.deploy(board.address, "https://token-cdn/");
     await build.deployed();
 
     accounts = await ethers.getSigners();

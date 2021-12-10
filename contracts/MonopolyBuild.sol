@@ -22,20 +22,22 @@ contract MonopolyBuild is ERC1155Supply, AccessControl {
 
 	MonopolyBoard private immutable board;
 
-	modifier isValidBuild(
+	function isValidBuild(
 		uint16 edition,
 		uint8 land,
 		uint8 buildType
-	) {
-		require(edition <= board.getMaxEdition(), "non valid edition number");
-		require(land <= board.getNbLands(edition), "land idx out of range");
-		require(buildType <= board.getBuildType(edition), "build_type out of range");
-		_;
+	) public view returns (bool) {
+		return
+			(edition <= board.getMaxEdition()) &&
+			(land <= board.getNbLands(edition)) &&
+			(board.isBuildingLand(edition, land)) &&
+			(buildType <= board.getBuildType(edition));
 	}
+
 	mapping(uint256 => Build) private builds;
 	uint256[] private buildIDs;
 
-	constructor(string memory _uri, address board_address) ERC1155(_uri) {
+	constructor(address board_address, string memory _uri) ERC1155(_uri) {
 		_setupRole(ADMIN_ROLE, msg.sender);
 		_setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
 		_setupRole(MINTER_ROLE, msg.sender);
@@ -50,7 +52,8 @@ contract MonopolyBuild is ERC1155Supply, AccessControl {
 		uint8 _land,
 		uint8 _buildType,
 		uint32 _supply
-	) public onlyRole(MINTER_ROLE) isValidBuild(_edition, _land, _buildType) returns (uint256 id_) {
+	) public onlyRole(MINTER_ROLE) returns (uint256 id_) {
+		require(isValidBuild(_edition, _land, _buildType), "BUILD does not exist");
 		id_ = generateID(_edition, _land, _buildType);
 
 		_mint(_to, id_, _supply, "");
